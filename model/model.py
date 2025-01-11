@@ -1,44 +1,58 @@
+import pandas as pd
+import numpy as np
 import tensorflow as tf
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelBinarizer
 
-# CNN 모델 설계
+# 1. CSV 데이터 불러오기 및 전처리
+def load_and_preprocess_data(file_path):
+    data = pd.read_csv(file_path)
+    X = data.drop(columns=['label']).values  # 'label' 열을 제외한 데이터
+    y = data['label'].values  # 'label' 열
+    X = X / 255.0
+    X = X.reshape((-1, 64, 64, 1))  # 데이터 리쉐이핑
+    lb = LabelBinarizer()
+    y = lb.fit_transform(y)
+    return X, y
+
+# 2. CNN 모델 설계
 def create_cnn_model(input_shape):
     model = Sequential()
-
-    # 첫 번째 컨볼루션 레이어와 풀링 레이어
     model.add(Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    # 두 번째 컨볼루션 레이어와 풀링 레이어
     model.add(Conv2D(64, (3, 3), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    # 세 번째 컨볼루션 레이어와 풀링 레이어
     model.add(Conv2D(128, (3, 3), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    # 드롭아웃을 통해 과적합 방지
     model.add(Dropout(0.5))
-
-    # Flatten 레이어
     model.add(Flatten())
-
-    # 완전 연결 레이어
     model.add(Dense(128, activation='relu'))
     model.add(Dropout(0.5))
-
-    # 출력 레이어 (소프트맥스 활성화)
     model.add(Dense(2, activation='softmax'))
-
-    # 모델 컴파일
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-
     return model
 
-# 입력 데이터의 형태 (예: 64x64 이미지와 유사한 2차원 CSI 데이터를 사용한다고 가정)
-input_shape = (64, 64, 1)  # 가로, 세로, 채널 수 (채널 수가 1인 흑백 이미지 형태로 가정)
-cnn_model = create_cnn_model(input_shape)
+# 3. 학습 및 저장
+def train_and_save_model(X, y, model_save_path):
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1, random_state=42)
+    model = create_cnn_model(X_train.shape[1:])
+    model.fit(X_train, y_train, epochs=10, validation_data=(X_val, y_val))
+    model.save(model_save_path)  # 모델 저장
+    return model
 
-# 모델 요약 출력
-cnn_model.summary()
+# 4. 새로운 데이터 예측
+def predict_new_data(model_path, new_data_file):
+    model = load_model(model_path)
+    X_new, _ = load_and_preprocess_data(new_data_file)
+    predictions = model.predict(X_new)
+    return predictions
+
+# 실행 예제
+X, y = load_and_preprocess_data('train_data.csv')
+train_and_save_model(X, y, 'cnn_model.h5')  # 모델 저장 경로 지정
+
+# 새로운 데이터 예측
+predictions = predict_new_data('cnn_model.h5', 'new_data.csv')
+print(predictions)  # 예측 결과 출력
