@@ -42,17 +42,6 @@ def train_and_save_model(X, y, model_save_path):
     model.save(model_save_path)  # 모델 저장
     return model
 
-# 4. 새로운 데이터 예측
-def predict_new_data(model_path, new_data_file):
-    model = load_model(model_path)
-    X_new, _ = load_and_preprocess_data(new_data_file)
-    predictions = model.predict(X_new)
-    return predictions
-
 # 실행 예제
 X, y = load_and_preprocess_data('train_data.csv')
 train_and_save_model(X, y, 'cnn_model.h5')  # 모델 저장 경로 지정
-
-# 새로운 데이터 예측
-predictions = predict_new_data('cnn_model.h5', 'new_data.csv')
-print(predictions)  # 예측 결과 출력
