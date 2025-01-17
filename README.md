@@ -6,3 +6,4 @@
 idf.py flash -p /dev/tty.usbserial-120 -b 115200 monitor
 
 ...
+ ㅍ
