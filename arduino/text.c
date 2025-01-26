@@ -37,7 +37,7 @@ void setup() {
     // CSI 설정
     wifi_csi_config_t csi_config = {
         .lltf_en = true,  // 장기 파일럿 CSI 활성화
-        .htltf_en = true, // 고속 파일럿 CSI 활성화
+        //.htltf_en = true, // 고속 파일럿 CSI 활성화
         .stbc_en = false, // STBC CSI 비활성화
         .ltf_merge_en = true,
         .channel_filter_en = true,
