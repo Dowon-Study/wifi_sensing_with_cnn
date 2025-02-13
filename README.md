@@ -4,6 +4,3 @@
 우선 데이터를 모으기 위해서 
 
 idf.py flash -p /dev/tty.usbserial-120 -b 115200 monitor
-
-...
- ㅍ
